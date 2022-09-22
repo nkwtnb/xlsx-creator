@@ -2,7 +2,7 @@
   <configuration default="false" name="Main" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="org.example.Main" />
     <module name="xlsx-creator-api" />
-    <option name="PROGRAM_PARAMETERS" value="&quot;{\&quot;key1-1\&quot;: 1, \&quot;key1-2\&quot;: {\&quot;key2-1\&quot;: 2}}&quot;" />
+    <option name="PROGRAM_PARAMETERS" value="{\&quot;cell\&quot;:{\&quot;title\&quot;:{\&quot;value\&quot;:\&quot;Thisistitle\&quot;}},\&quot;row\&quot;:{\&quot;details\&quot;:{\&quot;value\&quot;:[{\&quot;date\&quot;:{\&quot;value\&quot;:\&quot;2022-09-22\&quot;},\&quot;task\&quot;:{\&quot;value\&quot;:\&quot;meeting\&quot;}}]}}}" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="org.example.*" />

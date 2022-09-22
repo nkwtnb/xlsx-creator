@@ -27,9 +27,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class Main {
-    private static final String TEMPLATE_PATH = "./src/template2.xlsx";
-    private static final String OUT_PATH = "./src/out.xlsx";
-    private static final ObjectMapper mapper = new ObjectMapper();
     public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("Hello world!");
         Form form = new Form(args[0]);

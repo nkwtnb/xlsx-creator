@@ -15,8 +15,8 @@ import java.util.Iterator;
 import java.util.Objects;
 
 public class Form {
-    private static final String TEMPLATE_PATH = "./resources/template2.xlsx";
-    private static final String OUT_PATH = "./resources/out.xlsx";
+    private static final String TEMPLATE_PATH = "./src/main/resources/template2.xlsx";
+    private static final String OUT_PATH = "./src/main/resources/out.xlsx";
     private static final ObjectMapper mapper = new ObjectMapper();
     private final JsonNode cellNode;
     private final JsonNode rowNode;
@@ -60,14 +60,26 @@ public class Form {
             if (Objects.isNull(name)) {
                 continue;
             }
+            // 対象の名前セルの1件あたりの行数
             CellRangeAddress nameRange = CellRangeAddress.valueOf(name.getRefersToFormula());
+            int rowsPerItem = nameRange.getLastRow() - nameRange.getFirstRow() + 1;
+            prepareNextRow(nameRange, rowsPerItem);
             for (int i=0; i<sheet.getNumMergedRegions(); i++) {
                 CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
                 if (mergedRegion.getFirstRow() != nameRange.getFirstRow()) continue;
-                //
-                sheet.getRow(mergedRegion.getLastRow()+1)
-                copyRow(mergedRegion);
+                copyRow(mergedRegion, rowsPerItem);
             }
+        }
+    }
+    private void prepareNextRow(CellRangeAddress range, int rowsPerItem) {
+        // コピー元行の次の行から
+        int rowNum = range.getLastRow() + 1;
+        // 1件あたりの行数分シフト
+        for (int i=0; i<rowsPerItem; i++) {
+            if (sheet.getRow(rowNum + i) != null) {
+                sheet.shiftRows(rowNum + i, sheet.getLastRowNum(), 1);
+            }
+            sheet.createRow(rowNum + i);
         }
     }
     private Cell getTopLeftCell(CellRangeAddress range) {
@@ -91,32 +103,25 @@ public class Form {
         System.out.println("This is String value : " + nodeValue);
         cell.setCellValue(nodeValue.asText());
     }
-    private void copyRow(CellRangeAddress sourceRange) {
-        int sourceRowNum = sourceRange.getFirstRow();
-        int mergedRowCount = (sourceRange.getLastRow() - sourceRange.getFirstRow()) + 1;
-        System.out.println("range: " + sourceRange + "mergedRow: " + mergedRowCount);
-        if (sheet.getRow(sourceRange.getLastRow()+1) == null) {
-            System.out.println("destRow is null : " + (sourceRange.getLastRow()+1));
-            sheet.createRow(sourceRange.getLastRow()+1);
-        } else {
-            System.out.println("destRow is not null : " + (sourceRange.getLastRow()+1));
-            sheet.shiftRows(sourceRange.getLastRow()+1, sheet.getLastRowNum(), mergedRowCount);
-        }
-        Row destinationRow = sheet.getRow(sourceRange.getLastRow()+1);
-        System.out.println("destRow: " + destinationRow);
+    private void copyRow(CellRangeAddress sourceRange, int rowsPerItem) {
+        System.out.println(sourceRange.getFirstRow() + ", " + sourceRange.getLastRow() + ", " + sourceRange.getFirstColumn() + ", " + sourceRange.getLastColumn());
+        Row destinationRow = sheet.getRow(sourceRange.getFirstRow() + rowsPerItem);
         copyStyle(sourceRange, destinationRow);
         mergeCellAtSpecificRow(sourceRange, destinationRow);
+
+//        for (int i=0; i<rowsPerItem; i++) {
+//            Row destinationRow = sheet.getRow(sourceRange.getFirstRow() + rowsPerItem + i);
+//            copyStyle(sourceRange, destinationRow);
+//            mergeCellAtSpecificRow(sourceRange, destinationRow);
+//        }
     }
     private void copyStyle(CellRangeAddress sourceRange, Row destinationRow) {
         Row sourceRow = sheet.getRow(sourceRange.getFirstRow());
-//        Row destinationRow = sheet.getRow(sourceRowNum+1);
-        System.out.println("src: " + sourceRow.getRowNum());
-        System.out.println("dest: " + destinationRow.getRowNum());
+        System.out.println("last cell: " + sourceRow.getLastCellNum());
         for (int i=0; i<sourceRow.getLastCellNum(); i++) {
             Cell sourceCell = sourceRow.getCell(i);
             Cell destinationCell = destinationRow.createCell(i);
-            // TODO sourceCellがnullの場合
-
+            if (sourceCell == null) continue;
             // cellStyle
             CellStyle cellStyle = workbook.createCellStyle();
             cellStyle.cloneStyleFrom(sourceCell.getCellStyle());
@@ -134,14 +139,9 @@ public class Form {
         }
     }
     private void mergeCellAtSpecificRow(CellRangeAddress sourceRange, Row destinationRow) {
-        int mergedRowCount = (sourceRange.getLastRow() - sourceRange.getFirstRow() + 1);
-        System.out.println("mergedRegion: " + sourceRange);
-//            System.out.println("param: " +
-//                    destinationRow.getRowNum() + ", " +
-//                    (destinationRow.getRowNum() + mergedRowCount) + ", " +
-//                    mergedRegion.getFirstColumn() + ", " +
-//                    mergedRegion.getLastColumn()
-//            );
+        System.out.println("source range: " + sourceRange.getLastRow());
+        System.out.println("destination row: " + destinationRow.getRowNum());
+        int mergedRowCount = (sourceRange.getLastRow() - sourceRange.getFirstRow());
         CellRangeAddress mergeCellRangeAddress = new CellRangeAddress(
                 destinationRow.getRowNum(),
                 destinationRow.getRowNum() + mergedRowCount,
@@ -149,26 +149,6 @@ public class Form {
                 sourceRange.getLastColumn()
         );
         sheet.addMergedRegion(mergeCellRangeAddress);
-//
-//        for (int i=0; i<sheet.getNumMergedRegions(); i++) {
-//            CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
-//            if (mergedRegion.getFirstRow() != sourceRange.getFirstRow()) continue;
-//            int mergedRowCount = mergedRegion.getLastRow() - mergedRegion.getFirstRow();
-//            System.out.println("mergedRegion: " + mergedRegion);
-////            System.out.println("param: " +
-////                    destinationRow.getRowNum() + ", " +
-////                    (destinationRow.getRowNum() + mergedRowCount) + ", " +
-////                    mergedRegion.getFirstColumn() + ", " +
-////                    mergedRegion.getLastColumn()
-////            );
-//            CellRangeAddress mergeCellRangeAddress = new CellRangeAddress(
-//                    destinationRow.getRowNum(),
-//                    destinationRow.getRowNum() + mergedRowCount,
-//                    mergedRegion.getFirstColumn(),
-//                    mergedRegion.getLastColumn()
-//            );
-//            sheet.addMergedRegion(mergeCellRangeAddress);
-//        }
     }
     public void writeFile() throws IOException {
         try (FileOutputStream os = new FileOutputStream(OUT_PATH)) {
