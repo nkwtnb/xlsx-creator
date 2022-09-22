@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.Objects;
 
 public class Form {
-    private static final String TEMPLATE_PATH = "./src/main/resources/template2.xlsx";
+    private static final String TEMPLATE_PATH = "./src/main/resources/template_multi.xlsx";
     private static final String OUT_PATH = "./src/main/resources/out.xlsx";
     private static final ObjectMapper mapper = new ObjectMapper();
     private final JsonNode cellNode;
@@ -64,10 +64,16 @@ public class Form {
             CellRangeAddress nameRange = CellRangeAddress.valueOf(name.getRefersToFormula());
             int rowsPerItem = nameRange.getLastRow() - nameRange.getFirstRow() + 1;
             prepareNextRow(nameRange, rowsPerItem);
-            for (int i=0; i<sheet.getNumMergedRegions(); i++) {
-                CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
-                if (mergedRegion.getFirstRow() != nameRange.getFirstRow()) continue;
-                copyRow(mergedRegion, rowsPerItem);
+            for (int i=0; i<rowsPerItem; i++) {
+                Row sourceRow = sheet.getRow(nameRange.getFirstRow() + i);
+                Row destinationRow = sheet.getRow(nameRange.getFirstRow() + rowsPerItem + i);
+                copyRow(sourceRow, destinationRow);
+                for (int j=0; j<sheet.getNumMergedRegions(); j++) {
+                    CellRangeAddress mergedRegion = sheet.getMergedRegion(j);
+                    System.out.println(mergedRegion);
+                    if (mergedRegion.getFirstRow() != (nameRange.getFirstRow() + i)) continue;
+                    mergeCellAtSpecificRow(mergedRegion, rowsPerItem);
+                }
             }
         }
     }
@@ -103,21 +109,7 @@ public class Form {
         System.out.println("This is String value : " + nodeValue);
         cell.setCellValue(nodeValue.asText());
     }
-    private void copyRow(CellRangeAddress sourceRange, int rowsPerItem) {
-        System.out.println(sourceRange.getFirstRow() + ", " + sourceRange.getLastRow() + ", " + sourceRange.getFirstColumn() + ", " + sourceRange.getLastColumn());
-        Row destinationRow = sheet.getRow(sourceRange.getFirstRow() + rowsPerItem);
-        copyStyle(sourceRange, destinationRow);
-        mergeCellAtSpecificRow(sourceRange, destinationRow);
-
-//        for (int i=0; i<rowsPerItem; i++) {
-//            Row destinationRow = sheet.getRow(sourceRange.getFirstRow() + rowsPerItem + i);
-//            copyStyle(sourceRange, destinationRow);
-//            mergeCellAtSpecificRow(sourceRange, destinationRow);
-//        }
-    }
-    private void copyStyle(CellRangeAddress sourceRange, Row destinationRow) {
-        Row sourceRow = sheet.getRow(sourceRange.getFirstRow());
-        System.out.println("last cell: " + sourceRow.getLastCellNum());
+    private void copyRow(Row sourceRow, Row destinationRow) {
         for (int i=0; i<sourceRow.getLastCellNum(); i++) {
             Cell sourceCell = sourceRow.getCell(i);
             Cell destinationCell = destinationRow.createCell(i);
@@ -138,13 +130,10 @@ public class Form {
             }
         }
     }
-    private void mergeCellAtSpecificRow(CellRangeAddress sourceRange, Row destinationRow) {
-        System.out.println("source range: " + sourceRange.getLastRow());
-        System.out.println("destination row: " + destinationRow.getRowNum());
-        int mergedRowCount = (sourceRange.getLastRow() - sourceRange.getFirstRow());
+    private void mergeCellAtSpecificRow(CellRangeAddress sourceRange, int rowsPerItem) {
         CellRangeAddress mergeCellRangeAddress = new CellRangeAddress(
-                destinationRow.getRowNum(),
-                destinationRow.getRowNum() + mergedRowCount,
+                sourceRange.getFirstRow() + rowsPerItem,
+                sourceRange.getLastRow() + rowsPerItem,
                 sourceRange.getFirstColumn(),
                 sourceRange.getLastColumn()
         );
