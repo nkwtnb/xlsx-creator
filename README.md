@@ -75,3 +75,9 @@ Make Excel with data you want to input and return base64 encoded string of it.
     }
 }
 ````
+
+## build
+### IntelliJ
+1. execute build command below  
+`Menu > Build > Build Artifacts > xlsx-creator.jar > Build`
+2. then the jar file will be outputted in _out_ folder
