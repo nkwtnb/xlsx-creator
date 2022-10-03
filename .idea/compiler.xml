@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="kintone-export" />
         <module name="xlsx-creator-api" />
+        <module name="xlsx-creator" />
       </profile>
     </annotationProcessing>
   </component>

@@ -38,15 +38,25 @@ public class Form {
         JsonNode _map = mapper.readTree(json);
         cellNode = _map.get(FILED_KEY_CELL);
         rowNode = _map.get(FILED_KEY_ROW);
-        // TODO null check
-        cellNames = cellNode.fieldNames();
-        rowNames = rowNode.fieldNames();
+        if (Objects.isNull(cellNode)) {
+            cellNames = null;
+        } else {
+            cellNames = cellNode.fieldNames();
+        }
+        if (Objects.isNull(rowNode)) {
+            rowNames = null;
+        } else {
+            rowNames = rowNode.fieldNames();
+        }
         filePath = srcPath + SUFFIX;
         Files.copy(Paths.get(srcPath), Paths.get(filePath), StandardCopyOption.REPLACE_EXISTING);
         workbook = new XSSFWorkbook(filePath);
         sheet = workbook.getSheetAt(0);
     }
     public void setValues() {
+        if (Objects.isNull(cellNames)) {
+            return;
+        }
         while(cellNames.hasNext()) {
             var cellName = cellNames.next();
             Name name = workbook.getName(cellName);
@@ -65,6 +75,9 @@ public class Form {
         }
     }
     public void setRowValues() {
+        if (Objects.isNull(rowNames)) {
+            return;
+        }
         while(rowNames.hasNext()) {
             String rowName = rowNames.next();
             Name name = workbook.getName(rowName);
@@ -79,9 +92,12 @@ public class Form {
             // JSONの行データ分
             JsonNode rows = rowNode.get(rowName).get("value");
             // TODO don't use loop counter
-            int i = 0;
+            // TODO avoid loop twice
             for (JsonNode row : rows) {
                 prepareRows(nameRange, rowsPerItem, startRowNum);
+            }
+            int i = 0;
+            for (JsonNode row : rows) {
                 setValueByName(row, rowsPerItem, i);
                 i++;
             }
@@ -134,13 +150,16 @@ public class Form {
         while(rowFields.hasNext()) {
             String fieldInRow = rowFields.next();
             Name cellName = workbook.getName(fieldInRow);
+            if (Objects.isNull(cellName)) {
+                continue;
+            }
             CellRangeAddress range = CellRangeAddress.valueOf(cellName.getRefersToFormula());
             // 基準行から1行あたりの行数 * ループ回数分移動したセルを取得
             Cell topLeftCell = getTopLeftCell(range);
             int nextRowNum = topLeftCell.getRowIndex() + rowsPerItem * index;
-                Cell nextCell = sheet.getRow(nextRowNum).getCell(topLeftCell.getColumnIndex());
-            setValue(nextCell, row.get(fieldInRow).get("value"));
-            System.out.println("cell: " + range + ", " + row.get(fieldInRow) + ", " + nextRowNum);
+//            System.out.println(nextRowNum);
+            Cell nextCell = sheet.getRow(nextRowNum).getCell(topLeftCell.getColumnIndex());
+            setValue(nextCell, row.get(fieldInRow));
         }
     }
     private void copyStyle(Row sourceRow, Row destinationRow) {

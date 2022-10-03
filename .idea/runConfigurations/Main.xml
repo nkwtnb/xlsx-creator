@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Main" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="org.example.Main" />
-    <module name="xlsx-creator-api" />
-    <option name="PROGRAM_PARAMETERS" value="1 &quot;template_single&quot; {\&quot;cell\&quot;:{\&quot;testcell\&quot;:{\&quot;value\&quot;:\&quot;Thisistitle\&quot;}},\&quot;row\&quot;:{\&quot;details\&quot;:{\&quot;value\&quot;:[{\&quot;cell1\&quot;:{\&quot;value\&quot;:\&quot;2022-09-22\&quot;},\&quot;cell2\&quot;:{\&quot;value\&quot;:\&quot;meeting\&quot;}},{\&quot;cell3\&quot;:{\&quot;value\&quot;:\&quot;2022-09-22\&quot;},\&quot;cell4\&quot;:{\&quot;value\&quot;:\&quot;meeting\&quot;},\&quot;cell5\&quot;:{\&quot;value\&quot;:\&quot;meeting\&quot;},\&quot;cell6\&quot;:{\&quot;value\&quot;:\&quot;meeting\&quot;},\&quot;cell7\&quot;:{\&quot;value\&quot;:\&quot;meeting\&quot;}}]}}}" />
+    <module name="xlsx-creator" />
+    <option name="PROGRAM_PARAMETERS" value="&quot;storage/templates/template_single.xlsx&quot; {\&quot;cell\&quot;:{\&quot;testcell\&quot;:{\&quot;value\&quot;:\&quot;Thisistitle\&quot;}},\&quot;row\&quot;:{\&quot;details\&quot;:{\&quot;value\&quot;:[{\&quot;date\&quot;:{\&quot;value\&quot;:\&quot;2022-09-22\&quot;},\&quot;task\&quot;:{\&quot;value\&quot;:\&quot;meeting\&quot;}},{\&quot;cell3\&quot;:{\&quot;value\&quot;:\&quot;2022-09-22\&quot;},\&quot;cell4\&quot;:{\&quot;value\&quot;:\&quot;meeting\&quot;},\&quot;cell5\&quot;:{\&quot;value\&quot;:\&quot;meeting\&quot;},\&quot;cell6\&quot;:{\&quot;value\&quot;:\&quot;meeting\&quot;},\&quot;cell7\&quot;:{\&quot;value\&quot;:\&quot;meeting\&quot;}}]}}}" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="org.example.*" />
