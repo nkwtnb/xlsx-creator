@@ -1,7 +1,6 @@
 package org.example;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.util.concurrent.Callable;
 
 import static java.lang.Thread.sleep;
@@ -14,14 +13,10 @@ public class FormThread implements Callable<String> {
         json = _json;
     }
     @Override
-    public String call() {
-        try {
-            Form form = new Form(filePath, json);
-            form.setValues();
-            form.setRowValues();
-            return form.writeFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public String call() throws IOException, InterruptedException{
+        Form form = new Form(filePath, json);
+        form.setValues();
+        form.setRowValues();
+        return form.writeFile();
     }
 }
