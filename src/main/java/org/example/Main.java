@@ -7,8 +7,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
+import java.util.concurrent.*;
 
 public class Main {
+    public static final int EXIT_STATUS_NORMAL = 0;
+    public static final int EXIT_STATUS_ABNORMAL = 1;
+    public static final int EXIT_STATUS_TIMEOUT = 2;
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
             throw new Exception("パラメータの数が違います。[0]ファイルパス, [1]データ（json）を渡してください。");
@@ -19,11 +23,28 @@ public class Main {
             throw  new FileNotFoundException("対象のファイルが存在しません。" + filePathString);
         }
         String json = args[1];
-        Form form = new Form(filePathString, json);
-        form.setValues();
-        form.setRowValues();
-        String base64 = form.writeFile();
-        System.out.println(base64);
+        ThreadFactory daemon = new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r);
+                // when main thread exit, also daemon thread exit
+                t.setDaemon(true);
+                return t;
+            }
+        };
+        ExecutorService es = Executors.newSingleThreadExecutor(daemon);
+        String result = "";
+        try {
+            Future<String> future = es.submit(new FormThread(filePathString, json));
+            try {
+                result = future.get(5, TimeUnit.SECONDS);
+            } catch (TimeoutException te) {
+                System.exit(EXIT_STATUS_TIMEOUT);
+            }
+        } finally {
+            es.shutdown();
+        }
+        System.out.print(result);
     }
     public static Path getApplicationPath(Class<?> cls) throws URISyntaxException {
         ProtectionDomain pd = cls.getProtectionDomain();
