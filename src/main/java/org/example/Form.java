@@ -91,15 +91,13 @@ public class Form {
             int startRowNum = nameRange.getLastRow() + 1;
             // JSONの行データ分
             JsonNode rows = rowNode.get(rowName).get("value");
-            // TODO don't use loop counter
-            // TODO avoid loop twice
-            for (JsonNode row : rows) {
-                prepareRows(nameRange, rowsPerItem, startRowNum);
-            }
-            int i = 0;
-            for (JsonNode row : rows) {
+            for (int i=0; i<rows.size(); i++) {
+                // 基準行が存在するので、行コピーは1回分少なくする
+                if (i < rows.size()-1) {
+                    prepareRows(nameRange, rowsPerItem, startRowNum);
+                }
+                JsonNode row = rows.get(i);
                 setValueByName(row, rowsPerItem, i);
-                i++;
             }
         }
     }
