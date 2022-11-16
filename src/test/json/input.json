@@ -1,0 +1,26 @@
+{
+  "row": {
+    "detail": {
+      "value": [
+        {
+          "detail_item": {
+            "value": "アイテムテスト"
+          }
+        },
+        {
+          "detail_item": {
+            "value": ""
+          },
+          "detail_quantity": {
+            "value": 3
+          }
+        },
+        {
+          "detail_item": {
+            "value": "アイテムテスト３"
+          }
+        }
+      ]
+    }
+  }
+}
