@@ -14,8 +14,8 @@ public class Main {
     public static final int EXIT_STATUS_ABNORMAL = 1;
     public static final int EXIT_STATUS_TIMEOUT = 2;
     public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
-            throw new Exception("パラメータの数が違います。[0]ファイルパス, [1]データ（json）を渡してください。");
+        if (args.length != 3) {
+            throw new Exception("パラメータの数が違います。[0]ファイルパス, [1]データ（json）, [2]出力ファイル削除フラグ（0 or 1）を渡してください");
         }
         Path path = getApplicationPath(Main.class).getParent().resolve(args[0]);
         String filePathString = path.toString();
@@ -23,6 +23,7 @@ public class Main {
             throw  new FileNotFoundException("対象のファイルが存在しません。" + filePathString);
         }
         String json = args[1];
+        Boolean shouldDelete = (Integer.parseInt(args[2]) == 1);
         ThreadFactory daemon = new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
@@ -35,7 +36,7 @@ public class Main {
         ExecutorService es = Executors.newSingleThreadExecutor(daemon);
         String result = "";
         try {
-            Future<String> future = es.submit(new FormThread(filePathString, json));
+            Future<String> future = es.submit(new FormThread(filePathString, json, shouldDelete));
             try {
                 result = future.get(5, TimeUnit.SECONDS);
             } catch (TimeoutException te) {

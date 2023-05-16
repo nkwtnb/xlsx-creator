@@ -34,7 +34,8 @@ public class Form {
     private final XSSFWorkbook workbook;
     private final Sheet sheet;
     private final String filePath;
-    public Form(String srcPath, String json) throws IOException {
+    private final Boolean shouldDelete;
+    public Form(String srcPath, String json, Boolean _shouldDelete) throws IOException {
         JsonNode _map = mapper.readTree(json);
         cellNode = _map.get(FILED_KEY_CELL);
         rowNode = _map.get(FILED_KEY_ROW);
@@ -52,6 +53,7 @@ public class Form {
         Files.copy(Paths.get(srcPath), Paths.get(filePath), StandardCopyOption.REPLACE_EXISTING);
         workbook = new XSSFWorkbook(filePath);
         sheet = workbook.getSheetAt(0);
+        shouldDelete = _shouldDelete;
     }
     public void setValues() {
         if (Objects.isNull(cellNames)) {
@@ -189,7 +191,9 @@ public class Form {
         byteaOutput.close();
         base64Output.flush();
         base64Output.close();
-        Files.delete(Paths.get(filePath));
+        if (shouldDelete) {
+            Files.delete(Paths.get(filePath));
+        }
         return byteaOutput.toString();
     }
 }
